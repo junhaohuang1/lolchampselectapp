@@ -83,4 +83,6 @@ modules.xml
 .idea/misc.xml
 *.ipr
 
+capture.png
+
 # End of https://www.gitignore.io/api/pycharm+all

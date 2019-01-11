@@ -1,34 +1,54 @@
-import tkinter as tk
-import screenshot
-from PyQt5 import QtWidgets
+from screenshot import ScreenShot
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
+from PyQt5.QtCore import pyqtSlot
 import sys
 from google.cloud import vision
 import io
 
 
+class App(QWidget):
 
-def take_screenshot():
-    app = QtWidgets.QApplication(sys.argv)
-    window = screenshot.MyWidget()
-    window.show()
-    app.aboutToQuit.connect(app.deleteLater)
 
-def analyze_screenshot():
-    client = vision.ImageAnnotatorClient()
-    with io.open('capture.png', 'rb') as image_file:
-        content = image_file.read()
+    def __init__(self, parent=None):
+        super(App, self).__init__(parent)
+        self.title = 'LOL Champ Select App'
+        self.initUI()
 
-    image = vision.types.Image(content=content)
+    def initUI(self):
+        self.setWindowTitle(self.title)
+        button = QPushButton('Screenshot', self)
+        button.setToolTip('This is an example button')
+        button.clicked.connect(self.on_click)
+        self.show()
 
-    response = client.text_detection(image=image)
-    texts = response.text_annotations
+    @pyqtSlot()
+    def on_click(self):
+        window = ScreenShot(self)
+        window.show()
 
+    def analyze_screenshot(self):
+        client = vision.ImageAnnotatorClient()
+        with io.open('capture.png', 'rb') as image_file:
+            content = image_file.read()
+
+        image = vision.types.Image(content=content)
+
+        response = client.text_detection(image=image)
+        texts = response.text_annotations
+        print('Texts:')
+
+        for text in texts:
+            print('\n"{}"'.format(text.description))
+
+            vertices = (['({},{})'.format(vertex.x, vertex.y)
+                        for vertex in text.bounding_poly.vertices])
+
+            print('bounds: {}'.format(','.join(vertices)))
 
 
 if __name__ == '__main__':
-    m = tk.Tk()
-    screenshot_button = tk.Button(m, text='screenshot', width=25, command=take_screenshot)
-    screenshot_button.pack()
-    analyze_screenshot_button = tk.Button(m, text='analyze screenshot', width=25, command=analyze_screenshot)
-    analyze_screenshot_button.pack()
-    m.mainloop()
+    app = QApplication(sys.argv)
+    window = App()
+    window.show()
+    app.aboutToQuit.connect(app.deleteLater)
+    sys.exit(app.exec_())

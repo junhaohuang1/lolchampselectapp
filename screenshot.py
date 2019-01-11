@@ -3,11 +3,12 @@ import tkinter as tk
 from PIL import ImageGrab
 import numpy as np
 import cv2
+import sys
 
 
-class MyWidget(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
+class ScreenShot(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super(ScreenShot, self).__init__(parent)
         root = tk.Tk()
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
@@ -53,3 +54,10 @@ class MyWidget(QtWidgets.QWidget):
         cv2.imshow('Captured Image', img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    window = ScreenShot()
+    window.show()
+    app.aboutToQuit.connect(app.deleteLater)
+    sys.exit(app.exec_())

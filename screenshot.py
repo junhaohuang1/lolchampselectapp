@@ -7,7 +7,7 @@ import sys
 
 
 class ScreenShot(QtWidgets.QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super(ScreenShot, self).__init__(parent)
         root = tk.Tk()
         screen_width = root.winfo_screenwidth()
@@ -22,7 +22,6 @@ class ScreenShot(QtWidgets.QWidget):
         )
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         print('Capture the screen...')
-        self.show()
 
     def paintEvent(self, event):
         qp = QtGui.QPainter(self)
@@ -41,7 +40,7 @@ class ScreenShot(QtWidgets.QWidget):
 
     def mouseReleaseEvent(self, event):
         self.close()
-
+        self.took_screenshot = True
         x1 = min(self.begin.x(), self.end.x())
         y1 = min(self.begin.y(), self.end.y())
         x2 = max(self.begin.x(), self.end.x())
@@ -50,10 +49,16 @@ class ScreenShot(QtWidgets.QWidget):
         img = ImageGrab.grab(bbox=(x1, y1, x2, y2))
         img.save('capture.png')
         img = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)
-
+        self.parent().showNormal()
+        self.parent().setWindowOpacity(1)
+        self.parent().setWindowFlag(QtCore.Qt.Window)
+        QtWidgets.QApplication.setOverrideCursor(
+            QtGui.QCursor(QtCore.Qt.ArrowCursor)
+        )
         cv2.imshow('Captured Image', img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

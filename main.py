@@ -1,16 +1,15 @@
 from screenshot import ScreenShot
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
 from PyQt5.QtCore import pyqtSlot
 import sys
 from google.cloud import vision
 import io
 
 
-class App(QWidget):
+class App(QMainWindow):
 
-
-    def __init__(self, parent=None):
-        super(App, self).__init__(parent)
+    def __init__(self):
+        super(App, self).__init__()
         self.title = 'LOL Champ Select App'
         self.initUI()
 
@@ -19,12 +18,14 @@ class App(QWidget):
         button = QPushButton('Screenshot', self)
         button.setToolTip('This is an example button')
         button.clicked.connect(self.on_click)
-        self.show()
 
     @pyqtSlot()
     def on_click(self):
-        window = ScreenShot(self)
-        window.show()
+        self.setWindowOpacity(0.3)
+        self.showMaximized()
+        self.showFullScreen()
+        screenshot_window = ScreenShot(self)
+        screenshot_window.show()
 
     def analyze_screenshot(self):
         client = vision.ImageAnnotatorClient()
@@ -46,9 +47,13 @@ class App(QWidget):
             print('bounds: {}'.format(','.join(vertices)))
 
 
-if __name__ == '__main__':
+def main():
     app = QApplication(sys.argv)
     window = App()
     window.show()
     app.aboutToQuit.connect(app.deleteLater)
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()
